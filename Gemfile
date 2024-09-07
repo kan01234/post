@@ -1,2 +1,6 @@
+source "https://rubygems.org"
+
+gem "jekyll"
+
 gem "github-pages", group: :jekyll_plugins
-gem install jekyll-mermaid
+gem "jekyll-mermaid"
