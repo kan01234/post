@@ -3,6 +3,9 @@ author: kan01234
 description: A backend engineer's journey of learning and growth.
 logo: assets/logo.jpg
 remote_theme: pages-themes/minimal@v0.2.0
+mermaid:
+     src: 'https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.1.1/mermaid.min.js'
+gems: [jekyll-mermaid]
 plugins:
 - jekyll-remote-theme # add this line to the plugins list if you already have one
-gems: [jekyll-mermaid]
+
