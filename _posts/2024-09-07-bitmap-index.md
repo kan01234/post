@@ -47,6 +47,7 @@ Bitmap indexing is well-suited for scenarios where:
 ### Illustrative Example
 
 Consider an orders table with the following sample data and columns:
+
 | order_id | customer_id | order_status | payment_method |
 |----------|-------------|--------------|----------------|
 | 1        | 101         | Shipped      | Credit Card    |
