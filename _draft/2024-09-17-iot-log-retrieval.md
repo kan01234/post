@@ -1,11 +1,13 @@
 ---
 layout: post
-title: ""
-date: 2024-09-11
+title: "Remote Log Retrieval for Linux-Based Edge Devices: A System Design Approach"
+date: 2024-09-17
 tags: system-design
 ---
 
-## Requrimetns
+## Remote Log Retrieval for Linux-Based Edge Devices: A System Design Approach
+
+### Requrimetns
 
 A Linux-powered edge device, operating in a remote setting, runs a program that generates periodic debug or error log messages. These logs are currently channeled through the system's default syslog mechanism.
 
@@ -39,7 +41,17 @@ Calculating the Average Log Message size:
 
 log message size = 86,400,000 * 10% * 688 bytes * 10% + 86,400,000 * 188 bytes = 20GB
 
+#### Edge device can delivery the event in order
+
+Ordered Log Delivery
+
+A key assumption for the system design is that the edge device is capable of delivering log messages to the MQTT broker in the order they were generated. This implies that the device's logging mechanism or any intermediary components ensure that logs are published to the broker in their correct chronological sequence, even if there are network delays or temporary disconnections.
+
+This assumption simplifies the overall architecture and eliminates the need for complex message reordering or buffering on the server-side. It allows us to leverage the inherent ordering guarantees of certain message queues (e.g., RabbitMQ with ordering enabled, Amazon SQS FIFO queues) to ensure that logs are processed and stored in the correct order on the cloud server.
+
 ## System Design
+
+![sa](/assets/2024-09-17/sa.svg)
 
 ### Local Log Storage and Management on the Edge Device
 
@@ -246,19 +258,74 @@ sequenceDiagram
     participant a as Log Service (API / UI)
     participant o as Operator
 
-    e1 -->> b: subscribe topic /client/building-a/e1
-    e2 -->> b: subscribe topic /client/building-a/e2
+    e1 -->> b: subscribe topic /client/building-a/log-request/e1
+    e2 -->> b: subscribe topic /client/building-a/log-request/e2
     e2 -->> e2: power off
     o -->> a: request log, from 10:05 to 10:08, device 1
-    a -->> b: publish topic /client/building-a/e1, 10:05 - 10:08
+    a -->> b: publish topic /client/building-a/log-request/e1, 10:05 - 10:08
     a -->> o: OK
     o -->> a: request log, from 11:05 - 11:08, device 2
-    a -->> b: publish topic /client/building-a/e2, 11:05 - 11:08
+    a -->> b: publish topic /client/building-a/log-request/e2, 11:05 - 11:08
     a -->> o: OK
     b -->> e1: publish request log, from 10:05 to 10:08, device 1
     e1 -->> e1: write request to local storage
     e1 -->> b: ack
-    e1 -->> b: publish log line by line, topic /client/building-a/e1, log content
+    e1 -->> b: publish log by chunk, topic /client/building-a/log/e1, log content, chunk_seq, is_last_chunk
     e2 -->> e2: power on
     b -->> e2: publish topic /client/building-a/e2, 11:05 - 11:08, (then same as the log request flow of device 1)
 ```
+
+### Log Storage and Management on the Cloud Server
+
+#### Summary of Log Processing and Storage Architecture
+
+**MQTT to Message Queue:**
+
+The IoT device publishes log messages to the MQTT broker. The broker then forwards these messages to a message queue, ensuring reliable delivery and decoupling the device from the processing stage.
+
+**Processor and Storage:**
+
+The processor consumes messages from the queue, potentially processing them further. It then stores the log chunks, maintaining their chronological order, in either:
+
+- S3: For cost-effective and scalable storage, especially for simpler log retrieval scenarios.
+- Text Search Engine: For advanced search, filtering, and analytics capabilities.
+
+#### S3 Folder Strcuture
+
+```
+s3://log-bucket/
+├── requests/
+│   ├── <request_UUID_1>/
+│   │   ├── chunk-1.log.gz 
+│   │   └── chunk-2.log.gz 
+│   └── ...
+└── ...
+```
+
+In this structure:
+
+- The first _0 in the filename represents the sequence of the log file within the minute (in case multiple files are created due to size limits or other factors).
+
+- The second _0 (or _1, _2, etc.) represents the chunk sequence number within that specific log file.
+
+#### Applying a Text Search Engine (e.g., Elasticsearch)
+
+Instead of (or in addition to) storing log chunks directly in S3, the processor can index them into a text search engine like Elasticsearch.
+
+1. Parsing and Indexing: The processor parses each log chunk, extracts relevant fields (timestamp, log level, device ID, message, etc.), and indexes this structured data into Elasticsearch.
+
+2. Querying: When the operator requests logs, the server translates the query criteria into an Elasticsearch query. Elasticsearch performs the search and filtering, returning the matching log entries.
+
+#### Determining Request Completion
+
+* **Chunk-Based Upload with QoS:**
+    * IoT device publishes log chunks to MQTT with QoS 1 or 2.
+    * Chunk payload includes `is_last_chunk` flag to signal end of file upload.
+
+* **Determining Completion:**
+    * Processor tracks received chunks.
+    * File upload complete when chunk with `is_last_chunk` set to `true` is received.
+    * Request complete when all expected files are uploaded and processed.
+
+* **Notification:**
+    * Upon completion, processor notifies operator or publishes completion message to MQTT.
