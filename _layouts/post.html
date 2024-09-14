@@ -2,8 +2,6 @@
 layout: default
 ---
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.2.0/Diagram.d.ts"></script>
-
 <small>{{ page.date | date: "%-d %B %Y" }}</small>
 <h1>{{ page.title }}</h1>
 
@@ -14,3 +12,5 @@ layout: default
 {% if page.tags %}
   <small>tags: <em>{{ page.tags | join: "</em> - <em>" }}</em></small>
 {% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
