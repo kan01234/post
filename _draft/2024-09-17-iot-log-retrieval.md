@@ -250,7 +250,7 @@ If filtering by log level is required, it further selects only the files with th
 
 #### Sequence
 
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     participant e1 as Edge Device 1
     participant e2 as Edge Device 2
@@ -273,7 +273,7 @@ sequenceDiagram
     e1 -->> b: publish log by chunk, topic /client/building-a/log/e1, log content, chunk_seq, is_last_chunk
     e2 -->> e2: power on
     b -->> e2: publish topic /client/building-a/e2, 11:05 - 11:08, (then same as the log request flow of device 1)
-```
+</div>
 
 ### Log Storage and Management on the Cloud Server
 
