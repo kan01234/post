@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Remote Log Retrieval for Linux-Based Edge Devices: A System Design Approach"
-date: 2024-09-1
+date: 2024-09-15
 tags: mqtt,system-design
 ---
 
