@@ -55,7 +55,7 @@ Assume that every log retrieval request sent to the edge device can be successfu
 
 ## System Design
 
-![sa](/assets/2024-09-17/sa.png)
+![sa](/assets/2024-09-17/sa.svg)
 
 ### Local Log Storage and Management on the Edge Device
 
