@@ -49,6 +49,10 @@ A key assumption for the system design is that the edge device is capable of del
 
 This assumption simplifies the overall architecture and eliminates the need for complex message reordering or buffering on the server-side. It allows us to leverage the inherent ordering guarantees of certain message queues (e.g., RabbitMQ with ordering enabled, Amazon SQS FIFO queues) to ensure that logs are processed and stored in the correct order on the cloud server.
 
+#### Request Completion
+
+Assume that every log retrieval request sent to the edge device can be successfully processed and completed by the device. This means that the device has sufficient resources (CPU, memory, storage) and network connectivity to retrieve, filter (if applicable), and upload all the relevant log data within a reasonable timeframe.
+
 ## System Design
 
 ![sa](/assets/2024-09-17/sa.svg)
@@ -84,12 +88,12 @@ This assumption simplifies the overall architecture and eliminates the need for 
 
 | Log Type   | Uncompressed Size (approx.) | Calculation                               | Compressed Size (gzip, approx.) |
 |------------|-----------------------------|-------------------------------------------|---------------------------------|
-| Non-Error  | 10.9 MB                     | 60,000 logs/min * 188 bytes/log / 1024^2 | 1.2 MB (50% compression)        |
-| Error      | 4.13 MB                     | 60,000 logs/min * 10% * 500 bytes/log / 1024^2  | 0.25 MB (50% compression)        |
+| Non-Error  | 10.9 MB                     | 60,000 logs/min * 188 bytes/log / 1024^2 | 5.5 MB (50% compression)        |
+| Error      | 4.13 MB                     | 60,000 logs/min * 10% * 500 bytes/log / 1024^2  | 2.1 MB (50% compression)        |
 
 #### Log Rotation
 
-Rotation Rules (Inferred):
+Rotation Rules:
 
 - Time-Based Rotation: Log files are rotated every minute, creating a new file for each new minute.
 - Size-Based Rotation (Optional): The presence of sequence numbers suggests that log files might also be rotated if they exceed a certain size limit, even within the same minute.
@@ -110,26 +114,25 @@ Rotation Rules (Inferred):
      * The log files within that directory whose timestamps fall within the range (`2024-09-10_10-01.log.gz` to `2024-09-10_10-05.log.gz`)
    * If filtering by log level is required, it further selects only the files with the `_error` suffix (if filtering for errors) or all files (if no filtering).
 
-3. **Process Each File Sequentially**
+3. **Publish Log Chunks to MQTT**
 
-   * The device processes each selected log file one by one:
-     * **Decompression:** The `.gz` file is decompressed into memory using `gunzip` or a similar tool.
-     * **Filtering (if needed):**
-       * The decompressed log data is parsed.
-       * Log entries that do not match the requested log level are filtered out.
-     * **Prepare for Upload:**
-       * The filtered log entries (or the entire decompressed content if no filtering was applied) are prepared for upload.
+    * The device publishes each log chunk to the appropriate MQTT topic, ensuring in-order delivery.
+      * Each chunk's payload includes metadata like request_id, timestamp, chunk_sequence, and is_last_chunk.
 
-4. **Upload to Cloud Server**
+4. **Handle Interruptions**
 
-   * The device establishes a secure connection with the cloud server.
-   * The prepared log data for each file is uploaded sequentially.
-   * Memory used for decompression and filtering is freed after each upload to avoid excessive memory consumption.
+    * If the upload is interrupted, the progress checkpoint files indicate where to resume upon reconnection/restart.
+
+5. **Completion and Cleanup**
+
+    * Once all files are uploaded:
+      * Delete the request JSON file.
+      * Delete the temporary directory and its contents.
 
 **Memory Usage in Typical case:**
 
-The largest files would likely be the non-error log files, which are estimated to be around 10.9 MB (uncompressed) or 1.2 MB (compressed).
-In this case, the maximum memory usage would be around 10.9 MB.
+The largest files would likely be the non-error log files, which are estimated to be around 10.9 MB (uncompressed) or 5.5 MB (compressed).
+In this case, the maximum memory usage would be around 5.5 MB.
 
 #### Drawback: Potential Transfer of Unnecessary Log Data
 
@@ -206,7 +209,7 @@ Even within a private network, TLS ensures data confidentiality and integrity.
 ├── request-1
 ├── request-2
 ├── request-1/
-│   ├── 2024-09-10_05-00.json 
+│   ├── 2024-09-10_05-00.json.gz
 │   ├── 2024-09-10_06-00.json.gz
 │   ├── 2024-09-10_07-00.json.gz
 │   ├── 2024-09-12T10:05-00.trail
@@ -230,9 +233,7 @@ Even within a private network, TLS ensures data confidentiality and integrity.
 * For each copied file:
     * Create or read progress checkpoint file (`.trail`).
     * If checkpoint exists, resume from the recorded position.
-    * Decompress the log file.
-    * Filter log entries if needed.
-    * Upload filtered/unfiltered entries in chunks, updating the checkpoint after each successful upload.
+    * Upload entries in chunks, updating the checkpoint after each successful upload.
 
 **4. Handle Interruptions**
 
@@ -241,11 +242,10 @@ Even within a private network, TLS ensures data confidentiality and integrity.
 **5. Completion and Cleanup**
 
 * Once all files are uploaded:
-    * Delete the request JSON file.
     * Delete the temporary directory and its contents.
 
 Based on the requested time range, the device identifies the relevant daily and hourly directories in the file system (e.g., /var/log/iot_device/2024-09-10/10/).
-It selects the log files (*.log.gz) within those directories whose timestamps fall within the requested range.
+It selects the log files (*.json.gz) within those directories whose timestamps fall within the requested range.
 If filtering by log level is required, it further selects only the files with the _error
 
 #### Sequence
@@ -270,7 +270,7 @@ sequenceDiagram
     b -->> e1: publish request log, from 10:05 to 10:08, device 1
     e1 -->> e1: write request to local storage
     e1 -->> b: ack
-    e1 -->> b: publish log by chunk, topic /client/building-a/log/e1, log content, chunk_seq, is_last_chunk
+    e1 -->> b: publish log by chunk, topic /client/building-a/log/e1, chunk, chunk_seq, is_last_chunk
     e2 -->> e2: power on
     b -->> e2: publish topic /client/building-a/e2, 11:05 - 11:08, (then same as the log request flow of device 1)
 </div>
@@ -285,10 +285,10 @@ The IoT device publishes log messages to the MQTT broker. The broker then forwar
 
 **Processor and Storage:**
 
-The processor consumes messages from the queue, potentially processing them further. It then stores the log chunks, maintaining their chronological order, in either:
+The processor consumes messages from the queue, potentially processing them further. It then reassembles the log chunks into complete log files, maintaining their chronological order. These reassembled log files are then stored in either:
 
-- S3: For cost-effective and scalable storage, especially for simpler log retrieval scenarios.
-- Text Search Engine: For advanced search, filtering, and analytics capabilities.
+    S3: For cost-effective and scalable storage, especially for simpler log retrieval scenarios.
+    Text Search Engine: For advanced search, filtering, and analytics capabilities.
 
 #### S3 Folder Strcuture
 
@@ -296,25 +296,54 @@ The processor consumes messages from the queue, potentially processing them furt
 s3://log-bucket/
 ├── requests/
 │   ├── <request_UUID_1>/
-│   │   ├── chunk-1.log.gz 
-│   │   └── chunk-2.log.gz 
+│   │   ├── 2024-09-10_05-00.json.gz
+│   │   └── 2024-09-10_06-00.json.gz 
 │   └── ...
 └── ...
 ```
 
 In this structure:
 
-- The first _0 in the filename represents the sequence of the log file within the minute (in case multiple files are created due to size limits or other factors).
+- Each file within a request directory represents a processed log file, either containing non-error logs or error logs (with the _error suffix).
 
-- The second _0 (or _1, _2, etc.) represents the chunk sequence number within that specific log file.
+- The files can be either:
 
-#### Applying a Text Search Engine (e.g., Elasticsearch)
+    * Compressed: using gzip (.log.gz) to save storage space
+    * Uncompressed: (.log) if the subsequent analysis or retrieval tools require uncompressed text data
+
+The choice between compressed or uncompressed storage depends on the trade-offs between storage costs, retrieval speed, and the capabilities of the tools used to access and analyze the logs.
+
+#### Applying a Text Search Engine (e.g., Elasticsearch) (Optional)
 
 Instead of (or in addition to) storing log chunks directly in S3, the processor can index them into a text search engine like Elasticsearch.
 
 1. Parsing and Indexing: The processor parses each log chunk, extracts relevant fields (timestamp, log level, device ID, message, etc.), and indexes this structured data into Elasticsearch.
 
 2. Querying: When the operator requests logs, the server translates the query criteria into an Elasticsearch query. Elasticsearch performs the search and filtering, returning the matching log entries.
+
+#### Potential Processing and Filtering Tasks within the Processor (Optional)
+
+* **Log Formatting and Normalization**
+    * Standardize the format of log entries from different devices or sources
+    * Convert timestamps to a unified format
+    * Normalize log levels or other fields
+
+* **Data Enrichment**
+    * Add metadata or context to log entries:
+        * Device location or geographic information
+        * Device type or model
+        * User or session information (if applicable)
+        * Any other relevant contextual data
+
+* **Filtering and Sanitization**
+    * Filter out sensitive or personally identifiable information (PII)
+    * Remove unnecessary or redundant log entries
+    * Apply complex filtering based on keywords, patterns, or structured data
+
+* **Aggregation and Summarization**
+    * Aggregate or summarize log data to extract insights or trends
+    * Calculate metrics or statistics
+    * Generate reports or alerts based on patterns or thresholds
 
 #### Determining Request Completion
 
@@ -329,3 +358,23 @@ Instead of (or in addition to) storing log chunks directly in S3, the processor 
 
 * **Notification:**
     * Upon completion, processor notifies operator or publishes completion message to MQTT.
+
+#### Accessing the Logs 
+
+The operator can access the processed logs through the following methods:
+
+* **API:**
+   * A dedicated API can be provided to allow programmatic access to the logs. 
+   * The operator can specify the request ID, time range, and any filtering criteria to retrieve the desired logs.
+   * This approach is suitable for automated log analysis or integration with other systems.
+
+* **S3 Commands:**
+   * If the logs are stored in S3, the operator can use the AWS CLI or other S3 compatible tools to directly access and download the log files. 
+   * They can use the `aws s3 cp` or `aws s3 sync` commands to download specific files or entire directories based on the request ID and file naming conventions.
+   * This approach provides flexibility and direct access to the raw log files.
+
+* **Web Interface (Optional):**
+   * A user-friendly web interface can be developed to allow the operator to browse, search, and filter logs interactively.
+   * The interface can provide visualizations, dashboards, and other tools to aid in log analysis and troubleshooting.
+
+The choice of access method depends on the operator's preferences and the specific use case. The API offers programmatic access, S3 commands provide direct control, and a web interface offers a more user-friendly experience.
