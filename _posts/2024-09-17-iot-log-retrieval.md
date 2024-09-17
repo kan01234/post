@@ -186,6 +186,37 @@ Mutual TLS authentication is recommended to establish trust between the device a
 
 Both the device and the server use X.509 certificates to verify each other's identity during connection setup, preventing unauthorized access and man-in-the-middle attacks.
 
+#### Authentication Methods
+
+1. **OAuth 2.0/OpenID Connect**
+
+* **Concept:** Leverages industry-standard protocols for delegated authorization and authentication. The device obtains an access token from an authorization server, which it then presents to the MQTT broker for authentication.
+* **Advantages:** Strong authentication and fine-grained authorization capabilities, centralized identity management, supports various authentication flows and grant types
+* **Considerations:** Adds complexity due to the need for an external authorization server, requires the device to interact with the authorization server for token acquisition and renewal
+
+2. **Username/Password**
+
+* **Concept:** The simplest authentication mechanism where the device provides a username and password during connection establishment. The broker verifies these credentials against a stored password file or database.
+* **Advantages:** Easy to set up and configure, no external dependencies
+* **Considerations:** Less secure compared to token-based or certificate-based authentication, passwords are transmitted in plaintext unless combined with TLS encryption, can be challenging to scale and manage in large deployments
+
+**Comparison of Authentication Approaches**
+
+| Feature        | OAuth 2.0/OpenID Connect | Username/Password | 
+|----------------|---------------------------|--------------------|
+| Security        | High                      | Low to Moderate    |
+| Flexibility     | High (various flows/grants)| Low                |
+| Scalability     | High (centralized identity)| High (with clustering) |
+| Complexity      | High (external auth server)| Low                |
+| Network Reliance| High (for token acquisition)| Low                |
+| Suitability     | Large-scale, high-security | Small-scale, simple|
+
+**Chosen Approach: Username/Password**
+
+For this system, we'll utilize **username/password authentication** due to the intermittent network connectivity on the edge device. This approach minimizes reliance on network stability during the authentication process. We'll ensure robust security by combining it with TLS encryption and enforcing strong password policies on the device.
+
+**Important Note:** If the system's security requirements change or the scale of deployment increases significantly, it's advisable to re-evaluate the authentication mechanism and potentially transition to a more robust approach like OAuth 2.0 or mutual TLS.
+
 #### Private Tunnel (Optional):
 
 While a private tunnel adds inherent security, TLS can be layered on top to provide defense-in-depth and granular access control.
