@@ -39,7 +39,7 @@ Calculating the Average Log Message size:
     Log message length without exception: 188 bytes
     Probability of exception: 10%
 
-log message size = 86,400,000 * 10% * 688 bytes * 10% + 86,400,000 * 188 bytes = 20GB
+log message size = 86,400,000 * 10% * 688 bytes + 86,400,000 * 188 bytes = 20GB
 
 #### Edge device can delivery the event in order
 
@@ -55,7 +55,7 @@ Assume that every log retrieval request sent to the edge device can be successfu
 
 ## System Design
 
-![sa](/assets/2024-09-17/sa.svg)
+![sa](/assets/2024-09-17/sa.png)
 
 ### Local Log Storage and Management on the Edge Device
 
@@ -111,7 +111,7 @@ Rotation Rules:
    * Based on the requested time range, the device identifies:
      * The relevant daily directory (e.g., `2024-09-10`)
      * The corresponding hourly subdirectory (`10`)
-     * The log files within that directory whose timestamps fall within the range (`2024-09-10_10-01.log.gz` to `2024-09-10_10-05.log.gz`)
+     * The log files within that directory whose timestamps fall within the range (`2024-09-10_10-01.json.gz` to `2024-09-10_10-05.json.gz`)
    * If filtering by log level is required, it further selects only the files with the `_error` suffix (if filtering for errors) or all files (if no filtering).
 
 3. **Publish Log Chunks to MQTT**
@@ -256,7 +256,7 @@ Even within a private network, TLS ensures data confidentiality and integrity.
 **2. Identify and Copy Relevant Log Files**
 
 * Identifies relevant daily and hourly directories based on time range.
-* Selects log files (`.log.gz`) within the range and matching any log level filter.
+* Selects log files (`.json.gz`) within the range and matching any log level filter.
 * Copies selected files to a temporary request-specific directory.
 
 **3. Process Each Copied File Sequentially**
@@ -399,8 +399,8 @@ In this structure:
 
 - The files can be either:
 
-    * Compressed: using gzip (.log.gz) to save storage space
-    * Uncompressed: (.log) if the subsequent analysis or retrieval tools require uncompressed text data
+    * Compressed: using gzip (.json.gz) to save storage space
+    * Uncompressed: (.json) if the subsequent analysis or retrieval tools require uncompressed text data
 
 The choice between compressed or uncompressed storage depends on the trade-offs between storage costs, retrieval speed, and the capabilities of the tools used to access and analyze the logs.
 
