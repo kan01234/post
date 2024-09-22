@@ -7,6 +7,8 @@ tags: system-design
 
 ## Understanding Consistent Hashing: From Basics to Real-World Use Cases
 
+To achieve horizontal scaling, it's crucial to distribute requests and data efficiently and evenly across servers. A key challenge arises when adding or removing servers, which can disrupt the balance and lead to costly data movement. Consistent hashing is a powerful technique designed to address this issue. But before diving into how it works, let’s first take a closer look at the problem.
+
 ### Introduction to Hashing
 
 In computing, hashing is a technique used to efficiently map data (such as a key) to a fixed location in memory or on disk. This process is carried out using a hash function, which takes an input (the key) and produces a fixed-size hash value, often represented as an integer. The goal of hashing is to distribute data uniformly across a set of available storage locations.
@@ -109,6 +111,42 @@ With this setup, each physical node is responsible for multiple smaller partitio
 
 3. Fine-Grained Control:
 - Virtual nodes give the system fine-grained control over balancing the load. For example, if a server is more powerful, you can assign it more virtual nodes, allowing it to handle a larger proportion of the data and traffic. Conversely, less powerful servers can have fewer virtual nodes.
+
+### Drawbacks of Consistent Hashing
+
+**1. Imperfect Load Balancing**
+
+Even with virtual nodes, consistent hashing doesn’t always guarantee a perfectly balanced load. Some servers may still end up handling more data or requests than others, especially if certain keys are accessed more frequently (hotspots). For instance, in a system where some resources (e.g., popular videos or viral posts) are much more in demand, consistent hashing may not fully mitigate the issue.
+
+**2. Increased System Complexity:**
+
+Managing virtual nodes introduces overhead, particularly in large-scale systems with numerous servers. Adding more virtual nodes to improve balance increases operational complexity and makes it more difficult to debug and manage the system.
+
+**3. Cold Start Problem:**
+
+When new servers are added (e.g., during scaling events), they may initially have no data assigned, leading to a cold start issue. This server will need to gradually pick up load, which may create inefficiencies or delays. Over time, consistent hashing will rebalance, but the initial load distribution can be less efficient.
+
+**4. Snowball Effect:**
+
+If a server failure or removal occurs in an already uneven system, the redistribution of load can cause other servers to become overloaded. This “snowball effect” can lead to cascading failures as more and more load is shifted to fewer servers, potentially disrupting the entire system.
+
+**5. Hash Function Dependency:**
+
+The effectiveness of consistent hashing depends heavily on the quality of the chosen hash function. Poorly designed or non-uniform hash functions can lead to uneven distribution of data, which defeats the purpose of using consistent hashing in the first place.
+
+### Efficiency vs. Uniformity 
+
+**Efficiency:**
+
+- Consistent hashing minimizes data movement when nodes are added or removed, leading to efficient scaling with minimal disruption.
+- It helps avoid the costly reallocation of keys that traditional hashing methods would require.
+- However, ensuring this efficiency introduces complexity in managing virtual nodes, load balancing, and maintaining redundancy.
+
+**Uniformity:**
+
+- While consistent hashing distributes keys more evenly across nodes compared to traditional methods, achieving perfect uniformity is difficult.
+- Some nodes may end up with more load than others (hotspots), especially if virtual nodes or load balancing techniques aren’t carefully applied.
+- The challenge is balancing this distribution to ensure uniform performance without overloading specific nodes.
 
 ### Conclusion
 
