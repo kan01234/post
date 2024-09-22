@@ -49,7 +49,7 @@ There’s a fundamental problem with traditional hashing when applied to distrib
 
 Consistent hashing is a distributed hashing technique that addresses the key challenges faced by traditional hashing when nodes are added or removed. It achieves this by using a ring (or circle) structure where both data (keys) and nodes (servers) are placed based on their hash values.
 
-#### How Consistent Hashing Works
+### How Consistent Hashing Works
 
 1. The Hash Ring: Imagine a circle (or ring) where all possible hash values are arranged in a clockwise direction. Each node in the system is assigned a position on this ring, determined by applying a hash function to the node's identifier (like its IP address or server ID).
 
@@ -70,7 +70,7 @@ The term "consistent hashing" was introduced by David Karger et al. at MIT, and 
 
 However, two main problems arise with this approach:
 
-##### 1. Imbalanced Partitions:
+**1. Imbalanced Partitions:**
 
 In a real system, it's impossible to ensure that each server gets an equal-sized partition of the ring. Each partition is the hash space between two adjacent servers. As servers are added or removed, the size of these partitions can become highly uneven, meaning:
 
@@ -83,7 +83,7 @@ This imbalance can lead to inefficiency, as some servers may be overburdened whi
 
 if node 3 is removed, node 4 will get much more data than other nodes
 
-##### 2. Hotspots and Load Imbalance:
+**2. Hotspots and Load Imbalance:**
 
 Because partitions vary in size, it’s likely that some servers will experience much heavier loads than others. For instance, a server with a larger partition will receive more requests, which could cause performance bottlenecks. This can become particularly problematic as new servers are added or removed, leading to frequent rebalancing.
 
