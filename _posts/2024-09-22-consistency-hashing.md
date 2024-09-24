@@ -89,7 +89,7 @@ Because partitions vary in size, it’s likely that some servers will experience
 
 #### Addressing the Challenge
 
-To address these issues, one common solution is to use **virtual nodes** or **replicas**. By assigning multiple virtual nodes to each server, the partitions can be split more evenly across the ring. This ensures a more balanced distribution of keys and prevents any single server from being overloaded.
+To address these issues, one common solution is to use **virtual nodes**. By assigning multiple virtual nodes to each server, the partitions can be split more evenly across the ring. This ensures a more balanced distribution of keys and prevents any single server from being overloaded.
 
 ![hash-ring](/post/assets/2024-09-22/ring-vn.svg)
 
