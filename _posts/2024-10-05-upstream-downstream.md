@@ -41,7 +41,7 @@ Consider the following diagram:
 <div class="mermaid">
 graph LR
     A[Component A] --> B[Component B] --> C[Component C]
-```
+</div>
 
 Here’s how we can interpret this:
 
