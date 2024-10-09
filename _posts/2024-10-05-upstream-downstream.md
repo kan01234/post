@@ -38,7 +38,7 @@ In software development, we often talk about dependencies between different comp
 
 Consider the following diagram:
 
-```mermaid
+<div class="mermaid">
 graph LR
     A[Component A] --> B[Component B] --> C[Component C]
 ```
@@ -63,10 +63,10 @@ In open-source projects, the upstream/downstream concept comes into play when co
 
 Let’s visualize this:
 
-```mermaid
+<div class="mermaid">
 graph LR
     A[Original Project] --> B[Forked Project]
-```
+</div>
 
 In this case:
 
@@ -86,19 +86,19 @@ The upstream/downstream concept is especially relevant in distributed systems an
 Let’s look at a common setup:
 
 **Backend / Data pipeline**
-```mermaid
+<div class="mermaid">
 graph TD
     B[Service B] --> A[Service A]
-```
+</div>
 
 **Request**
-```mermaid
+<div class="mermaid">
 sequenceDiagram
     Client ->> ServiceA: 
     ServiceA ->> ServiceB: 
     ServiceB ->> ServiceA: 
     ServiceA ->> Client: 
-```
+</div>
 
 In these cases:
 
