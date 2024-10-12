@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Why String Concatenation with `+=` is Slower than Using `StringBuilder` in Java"
+title: "Why String Concatenation with += is Slower than Using StringBuilder in Java"
 date: 2024-10-12
 tags: java,string,low-level
 ---
