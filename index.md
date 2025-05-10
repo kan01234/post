@@ -14,22 +14,23 @@ title: kan01234 - Software Engineer Notes
 
 {% for category in categories %}
   {% assign category_name = category[0] %}
-  
+  <h3>
   {% if category_name == "infra" %}
-    <h3>Infrastructure & Platform Engineering</h3>
+    Infrastructure & Platform Engineering
   {% elsif category_name == "monitoring" %}
-    <h3>Monitoring & Observability</h3>
+    Monitoring & Observability
   {% elsif category_name == "best-practices" %}
-    <h3>Software Engineering Best Practices</h3>
+    Software Engineering Best Practices
   {% elsif category_name == "system-design" %}
-    <h3>System Design & Distributed Systems</h3>
+    System Design & Distributed Systems
   {% elsif category_name == "protocols" %}
-    <h3>Web & Network Protocols</h3>
+    Web & Network Protocols
   {% elsif category_name == "journey" %}
-    <h3>Personal Journey</h3>
+    Personal Journey
   {% else %}
-    <h3>{{ category_name }}</h3>
+    {{ category_name }}
   {% endif %}
+  </h3>
 
   <ul>
     {% for post in category[1] %}
