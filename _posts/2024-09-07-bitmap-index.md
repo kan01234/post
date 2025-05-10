@@ -3,6 +3,7 @@ layout: post
 title: "Bitmap Indexing: A Deep Dive for Data"
 date: 2024-09-07
 tags: database,indexing
+category: best-practices
 ---
 
 ## Bitmap Indexing: A Deep Dive for Engineers

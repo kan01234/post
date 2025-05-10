@@ -3,6 +3,7 @@ layout: post
 title: " How We Solved a High Memory Usage Issue in Our Apache Camel Batch Pipeline"
 date: 2025-5-10
 tags: apache-camel spring-boot spring-data-jpa batch-processing csv-export memory-optimization java streaming performance mysql backend
+catecategory: best-practices
 ---
 
 # 🔧 How We Solved a High Memory Usage Issue in Our Apache Camel Batch Pipeline

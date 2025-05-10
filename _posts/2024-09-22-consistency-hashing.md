@@ -3,6 +3,7 @@ layout: post
 title: "Understanding Consistent Hashing: From Basics to Real-World Use Cases"
 date: 2024-09-22
 tags: system-design
+category: system-design
 ---
 
 ## Understanding Consistent Hashing: From Basics to Real-World Use Cases
