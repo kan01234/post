@@ -5,3 +5,17 @@ logo: assets/logo.avif
 remote_theme: pages-themes/minimal@v0.2.0
 plugins:
 - jekyll-remote-theme # add this line to the plugins list if you already have one
+
+categories:
+- key: infra
+  title: 🧱 Infrastructure & Platform Engineering
+- key: monitoring
+  title: 📊 Monitoring & Observability
+- key: coding
+  title: 🧠 Software Engineering Best Practices & Concepts
+- key: system-design
+  title: 📐 System Design & Distributed Systems
+- key: network
+  title: 🔐 Web & Network Protocols
+- key: person
+  title: ✨ Personal/Company Journey

@@ -3,6 +3,7 @@ layout: post
 title: "From Self-Managed ELK to Datadog: Our Migration Journey"
 date: 2024-08-01
 tags: monitoring
+category: monitoring
 ---
 
 ## The Appeal of Datadog
