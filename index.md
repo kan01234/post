@@ -1,5 +1,6 @@
 ---
 title: kan01234 - Software Engineer Notes
+permalink: /post/:categories/:title/
 ---
 
 <!-- <ul>
