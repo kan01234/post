@@ -3,7 +3,7 @@ layout: post
 title: "Enhancing Monitoring with Datadog: Logs, APM, and Metrics"
 date: 2025-2-2
 tags: monitoring site-reliability datadog
-category: monitoring
+categories: monitoring
 ---
 
 ## Enhancing Monitoring with Datadog: Logs, APM, and Metrics

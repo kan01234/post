@@ -3,7 +3,7 @@ layout: post
 title: "Monitoring Fundamentals: Building a Strong Foundation"
 date: 2025-1-20
 tags: monitoring site-reliability
-category: monitoring
+categories: monitoring
 ---
 
 ### Monitoring Fundamentals: Building a Strong Foundation

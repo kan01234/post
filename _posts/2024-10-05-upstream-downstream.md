@@ -3,7 +3,7 @@ layout: post
 title: "Clarifying Upstream and Downstream in Software Development"
 date: 2024-10-05
 tags: system-design
-category: system-design
+categories: system-design
 ---
 
 ## Clarifying Upstream and Downstream in Software Development

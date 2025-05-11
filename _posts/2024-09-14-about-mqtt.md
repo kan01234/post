@@ -3,7 +3,7 @@ layout: post
 title: "MQTT: The Lightweight Backbone of the Internet of Things"
 date: 2024-09-14
 tags: mqtt,iot,system-design
-category: system-design
+categories: system-design
 ---
 
 ## MQTT: The Lightweight Backbone of the Internet of Things
