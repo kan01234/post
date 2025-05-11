@@ -20,9 +20,9 @@ title: kan01234 - Software Engineer Notes
   {% elsif category_name == "monitoring" %}
     Monitoring & Observability
   {% elsif category_name == "best-practices" %}
-    Software Engineering Best Practices
+    Software Engineering & Best Practices
   {% elsif category_name == "system-design" %}
-    System Design & Distributed Systems
+    System Design
   {% elsif category_name == "protocols" %}
     Web & Network Protocols
   {% elsif category_name == "journey" %}
