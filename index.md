@@ -23,6 +23,8 @@ title: kan01234 - Software Engineer Notes
     Software Engineering & Best Practices
   {% elsif category_name == "system-design" %}
     System Design
+  {% elsif category_name == "datastore" %}
+    Datastore
   {% elsif category_name == "protocols" %}
     Web & Network Protocols
   {% elsif category_name == "journey" %}
