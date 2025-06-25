@@ -6,8 +6,6 @@ tags: system-design
 categories: system-design
 ---
 
-# System Design: Building a Fair and Scalable Gacha System for Mobile Games
-
 ## 🧱 Objective
 
 Design a Gacha (ガチャ) System for a mobile game that:

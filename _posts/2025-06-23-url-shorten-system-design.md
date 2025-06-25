@@ -6,8 +6,6 @@ tags: system-design
 categories: system-design
 ---
 
-# 
-
 ## 🔧 Goal: Design a URL Shortening Service
 
 > Like Bitly: Given a long URL, generate a short unique alias (e.g., bit.ly/abc123) and redirect users when they visit that short link.

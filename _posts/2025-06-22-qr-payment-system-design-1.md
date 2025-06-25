@@ -6,8 +6,6 @@ tags: system-design
 categories: system-design
 ---
 
-# System Design: QR Code Payment System (Synchronous Version)
-
 ## 🎯 Key Design Goals for a Financial System
 
 In any financial system — especially one handling wallet balances and real-time payments — we must ensure:

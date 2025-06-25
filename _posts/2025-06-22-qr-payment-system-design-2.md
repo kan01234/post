@@ -6,8 +6,6 @@ tags: system-design
 categories: system-design
 ---
 
-# System Design: Scale the QR Code Payment System using the Saga Pattern
-
 Scale the QR Code Payment System using the Saga Pattern, which is ideal when:
 
 - You want to loosen coupling between services

@@ -6,8 +6,6 @@ tags: redis, performance, data-structures
 categories: datastore
 ---
 
-# 🔍 How Redis Achieves O(1) Operations — And When It Doesn’t
-
 Redis is renowned for its blazing-fast performance, often delivering sub-millisecond responses. A common claim is that many Redis operations run in **O(1)** time. But what exactly does that mean—and when does it not hold true?
 
 Let’s break it down.
