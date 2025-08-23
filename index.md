@@ -15,13 +15,13 @@ title: kan01234 - Software Engineer Notes
 {% for category in categories %}
   {% assign category_name = category[0] %}
   <h3>
-  {% elsif category_name == "system-design" %}
+  {% if category_name == "system-design" %}
     System Design
   {% elsif category_name == "datastore" %}
     Datastore
   {% elsif category_name == "java" %}
     Java
-  {% if category_name == "infra" %}
+  {% elsif category_name == "infra" %}
     Infrastructure & Platform Engineering
   {% elsif category_name == "monitoring" %}
     Monitoring & Observability
