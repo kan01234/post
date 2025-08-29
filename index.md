@@ -13,6 +13,7 @@ title: kan01234 - Software Engineer Notes
 {% assign categories = site.categories %}
 
 <!-- show the most recent posts here -->
+<h2>Recent Posts</h2>
 <ul>
   {% for post in site.posts limit:5 %}
     <li>
