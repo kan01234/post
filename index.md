@@ -12,6 +12,16 @@ title: kan01234 - Software Engineer Notes
 
 {% assign categories = site.categories %}
 
+<!-- show the most recent posts here -->
+<ul>
+  {% for post in site.posts limit:5 %}
+    <li>
+      <a href="/post{{ post.url }}">{{ post.title }}</a>
+      <span>{{ post.date | date: "%Y-%m-%d" }}</span>
+    </li>
+  {% endfor %}
+</ul>
+
 {% for category in categories %}
   {% assign category_name = category[0] %}
   <h3>
